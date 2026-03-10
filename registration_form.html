@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Registration Form</title>
+
+<style>
+    body{
+    font-family: Arial, sans-serif;
+    background:#f4f4f4;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    }
+
+    .container{
+    background:white;
+    padding:25px;
+    width:350px;
+    border-radius:8px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2{
+    text-align:center;
+    }
+
+    .input-group{
+    margin-bottom:15px;
+    }
+
+    input{
+    width:100%;
+    padding:8px;
+    margin-top:5px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    }
+
+    .error{
+    color:red;
+    font-size:12px;
+    }
+
+    .success{
+    color:green;
+    font-size:12px;
+    }
+
+    .strength{
+    height:6px;
+    border-radius:5px;
+    margin-top:5px;
+    background:#ddd;
+    }
+
+    .strength-bar{
+    height:100%;
+    width:0%;
+    border-radius:5px;
+    }
+
+    button{
+    width:100%;
+    padding:10px;
+    background:#007BFF;
+    border:none;
+    color:white;
+    border-radius:5px;
+    cursor:pointer;
+    }
+
+    button:hover{
+    background:#0056b3;
+    }
+
+    .toggle{
+    cursor:pointer;
+    font-size:12px;
+    color:#007BFF;
+    margin-top:3px;
+    display:inline-block;
+    }
+</style>
+</head>
+
+<body>
+
+    <div class="container">
+
+    <h2>Register</h2>
+
+    <form id="regForm">
+
+    <div class="input-group">
+    <label>Name</label>
+    <input type="text" id="name">
+    <div id="nameError" class="error"></div>
+    </div>
+
+    <div class="input-group">
+    <label>Email</label>
+    <input type="email" id="email">
+    <div id="emailError" class="error"></div>
+    </div>
+
+    <div class="input-group">
+    <label>Phone</label>
+    <input type="text" id="phone">
+    <div id="phoneError" class="error"></div>
+    </div>
+
+    <div class="input-group">
+    <label>Password</label>
+    <input type="password" id="password">
+    <span class="toggle" onclick="togglePassword()">Show/Hide</span>
+
+    <div class="strength">
+    <div class="strength-bar" id="strengthBar"></div>
+    </div>
+
+    <div id="passwordError" class="error"></div>
+    </div>
+
+    <button type="submit">Register</button>
+
+    </form>
+
+    </div>
+
+    <script>
+
+        const form = document.getElementById("regForm")
+
+        const nameInput = document.getElementById("name")
+        const emailInput = document.getElementById("email")
+        const phoneInput = document.getElementById("phone")
+        const passwordInput = document.getElementById("password")
+
+        const nameError = document.getElementById("nameError")
+        const emailError = document.getElementById("emailError")
+        const phoneError = document.getElementById("phoneError")
+        const passwordError = document.getElementById("passwordError")
+
+        const strengthBar = document.getElementById("strengthBar")
+
+        function validateName(){
+        if(nameInput.value.length < 3){
+        nameError.textContent="Name must be at least 3 characters"
+        return false
+        }
+        nameError.textContent=""
+        return true
+        }
+
+        function validateEmail(){
+        const pattern=/^[^ ]+@[^ ]+\.[a-z]{2,3}$/
+        if(!pattern.test(emailInput.value)){
+        emailError.textContent="Invalid email"
+        return false
+        }
+        emailError.textContent=""
+        return true
+        }
+
+        function validatePhone(){
+        const pattern=/^[0-9]{10}$/
+        if(!pattern.test(phoneInput.value)){
+        phoneError.textContent="Phone must be 10 digits"
+        return false
+        }
+        phoneError.textContent=""
+        return true
+        }
+
+        function checkPasswordStrength(){
+
+        let val=passwordInput.value
+        let strength=0
+
+        if(val.length>=6) strength++
+        if(/[A-Z]/.test(val)) strength++
+        if(/[0-9]/.test(val)) strength++
+        if(/[^A-Za-z0-9]/.test(val)) strength++
+
+        let width=0
+        let color="red"
+
+        if(strength===1){
+        width=25
+        color="red"
+        }
+        else if(strength===2){
+        width=50
+        color="orange"
+        }
+        else if(strength===3){
+        width=75
+        color="yellowgreen"
+        }
+        else if(strength===4){
+        width=100
+        color="green"
+        }
+
+        strengthBar.style.width=width+"%"
+        strengthBar.style.background=color
+        }
+
+        function validatePassword(){
+        if(passwordInput.value.length < 6){
+        passwordError.textContent="Password must be at least 6 characters"
+        return false
+        }
+        passwordError.textContent=""
+        return true
+        }
+
+        function togglePassword(){
+        if(passwordInput.type==="password"){
+        passwordInput.type="text"
+        }else{
+        passwordInput.type="password"
+        }
+        }
+
+        nameInput.addEventListener("input",validateName)
+        emailInput.addEventListener("input",validateEmail)
+        phoneInput.addEventListener("input",validatePhone)
+
+        passwordInput.addEventListener("input",()=>{
+        checkPasswordStrength()
+        validatePassword()
+        })
+
+        form.addEventListener("submit",(e)=>{
+
+        e.preventDefault()
+
+        let valid =
+        validateName() &
+        validateEmail() &
+        validatePhone() &
+        validatePassword()
+
+        if(!valid) return
+
+        let submission={
+        name:nameInput.value,
+        email:emailInput.value,
+        phone:phoneInput.value,
+        password:passwordInput.value,
+        date:new Date().toLocaleString()
+        }
+
+        let submissions=JSON.parse(localStorage.getItem("submissions")) || []
+
+        submissions.push(submission)
+
+        localStorage.setItem("submissions",JSON.stringify(submissions))
+
+        alert("Registration Saved!")
+
+        form.reset()
+        strengthBar.style.width="0%"
+
+        })
+
+    </script>
+
+</body>
+</html>
